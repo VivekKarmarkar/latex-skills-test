@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What If You Never Had to Leave? — Computational Physics in One Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-julia.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-latex.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bg: '#0d1117',
+                        surface: '#161b22',
+                        surfaceLight: '#1c2333',
+                        border: '#30363d',
+                        textPrimary: '#e6edf3',
+                        textSecondary: '#8b949e',
+                        textMuted: '#6e7681',
+                        accent: '#e94560',
+                        accentSoft: '#e9456020',
+                        blue: '#58a6ff',
+                        green: '#3fb950',
+                        purple: '#bc8cff',
+                        orange: '#d29922',
+                        red: '#f85149',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                        serif: ['Georgia', 'Cambria', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap');
+
+        html { scroll-behavior: smooth; }
+        body { background: #0d1117; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0d1117; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 3px; }
+
+        /* Feynman pull-quote */
+        .feynman-voice {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-style: italic;
+            color: #e6edf3;
+            font-size: 1.35rem;
+            line-height: 1.7;
+            border-left: 3px solid #e94560;
+            padding-left: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        /* Skill badge */
+        .skill-badge {
+            background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 100%);
+            color: #0d1117;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
+            font-weight: 600;
+        }
+
+        /* Terminal */
+        .terminal {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            border-radius: 8px;
+            padding: 1rem 1.25rem;
+            overflow-x: auto;
+        }
+        .terminal .ok { color: #3fb950; }
+        .terminal .bad { color: #f85149; }
+        .terminal .dim { color: #6e7681; }
+
+        /* Callout boxes */
+        .callout-trap {
+            border-left: 3px solid #f85149;
+            background: #f8514910;
+        }
+        .callout-insight {
+            border-left: 3px solid #3fb950;
+            background: #3fb95010;
+        }
+        .callout-wonder {
+            border-left: 3px solid #bc8cff;
+            background: #bc8cff10;
+        }
+
+        /* Section number */
+        .section-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            font-weight: 700;
+            color: #30363d;
+            line-height: 1;
+        }
+
+        /* Fade in on scroll */
+        .fade-in { opacity: 0; transform: translateY(16px); transition: all 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Arrow connector */
+        .arrow-down {
+            width: 2px; height: 32px;
+            background: linear-gradient(to bottom, #58a6ff, #bc8cff);
+            margin: 0 auto;
+            position: relative;
+        }
+        .arrow-down::after {
+            content: '▾'; position: absolute; bottom: -10px; left: 50%;
+            transform: translateX(-50%); color: #bc8cff; font-size: 12px;
+        }
+
+        /* Equation box */
+        .equation {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.25rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            color: #e6edf3;
+            overflow-x: auto;
+        }
+
+        /* Prism overrides for dark */
+        pre[class*="language-"] { border-radius: 8px; margin: 0; border: 1px solid #30363d; }
+        code[class*="language-"] { font-size: 0.82rem; }
+
+        /* Weather card */
+        .weather-row { border-bottom: 1px solid #30363d; }
+        .weather-row:last-child { border-bottom: none; }
+    </style>
+</head>
+<body class="text-textPrimary font-sans leading-relaxed">
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- I. THE HOOK — "WHAT IF YOU NEVER HAD TO LEAVE?" -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <header class="relative overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] bg-blue/5 rounded-full blur-[100px]"></div>
+        </div>
+        <div class="relative max-w-3xl mx-auto px-6 pt-24 pb-20">
+            <p class="text-textMuted text-sm font-mono mb-8 tracking-wider uppercase">A lesson in computational physics</p>
+
+            <h1 class="text-4xl md:text-6xl font-black leading-[1.1] mb-8">
+                What if you never<br>had to <span class="text-accent">leave?</span>
+            </h1>
+
+            <p class="text-xl text-textSecondary leading-relaxed max-w-2xl mb-10">
+                A physicist walks up to a terminal. She derives an equation, solves it
+                numerically, plots the result, writes a publication-quality report, and
+                checks tomorrow's weather — all without switching tools, windows, or
+                mental contexts. This is what happened. This is how it works. And this
+                is why it matters.
+            </p>
+
+            <div class="flex flex-wrap gap-2 text-xs font-mono text-textMuted">
+                <span class="bg-surface px-3 py-1.5 rounded-full border border-border">/latex</span>
+                <span class="text-border">→</span>
+                <span class="bg-surface px-3 py-1.5 rounded-full border border-border">/ode-problem-julia</span>
+                <span class="text-border">→</span>
+                <span class="bg-surface px-3 py-1.5 rounded-full border border-border">/ode-solve-julia</span>
+                <span class="text-border">→</span>
+                <span class="bg-surface px-3 py-1.5 rounded-full border border-border">/plot-julia</span>
+                <span class="text-border">→</span>
+                <span class="bg-surface px-3 py-1.5 rounded-full border border-border">/latex</span>
+                <span class="text-border">→</span>
+                <span class="bg-surface px-3 py-1.5 rounded-full border border-border text-orange">/checkweather</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- NAV -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <nav class="sticky top-0 z-50 bg-bg/90 backdrop-blur border-b border-border">
+        <div class="max-w-3xl mx-auto px-6 py-3 flex gap-5 overflow-x-auto text-xs font-medium text-textMuted">
+            <a href="#wonder" class="hover:text-textPrimary whitespace-nowrap">The Wonder</a>
+            <a href="#phenomenon" class="hover:text-textPrimary whitespace-nowrap">The Phenomenon</a>
+            <a href="#honest-equation" class="hover:text-textPrimary whitespace-nowrap">The Honest Equation</a>
+            <a href="#teaching-friction" class="hover:text-textPrimary whitespace-nowrap">Teaching a Computer</a>
+            <a href="#the-lie" class="hover:text-textPrimary whitespace-nowrap">The Computer Lied</a>
+            <a href="#now-were-talking" class="hover:text-textPrimary whitespace-nowrap">Now We're Talking</a>
+            <a href="#and-then" class="hover:text-textPrimary whitespace-nowrap">And Then, the Weather</a>
+            <a href="#what-this-means" class="hover:text-textPrimary whitespace-nowrap">What This Means</a>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6">
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- II. THE WONDER -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="wonder" class="py-20 border-b border-border">
+            <div class="section-num mb-4">01</div>
+            <h2 class="text-3xl font-bold mb-6">The wonder of not switching</h2>
+
+            <p class="text-lg text-textSecondary mb-6">
+                Here's something that should bother you.
+            </p>
+
+            <p class="text-textSecondary mb-6">
+                To solve a single physics problem — one block on one surface — a typical
+                workflow touches <em>five different tools</em>: a LaTeX editor for the derivation,
+                a code editor for the numerics, a terminal to run the solver, a plotting library
+                to visualize, and the LaTeX editor again to write it up. Each transition is a
+                context switch. Each context switch is a small death of momentum.
+            </p>
+
+            <p class="text-textSecondary mb-6">
+                Now imagine a different world. You type a description of a physical system
+                into a terminal. Fifteen minutes later, you have a 6-page derivation, a
+                numerical solution, a 3-panel figure, and an 8-page report. You never left
+                the terminal. You never opened another window. Every tool was a single
+                command — a <em>verb</em> — in a language designed around how physicists
+                actually think.
+            </p>
+
+            <div class="feynman-voice">
+                The question isn't whether the computer can do each step. Of course it can.
+                The question is: what happens to the <em>physics</em> when you remove the
+                friction between the steps?
+            </div>
+
+            <p class="text-textSecondary">
+                That double meaning — friction in the physics problem, friction in the
+                workflow — is not accidental. Let's see both.
+            </p>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- III. THE PHENOMENON — SHOW BEFORE EXPLAIN -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="phenomenon" class="py-20 border-b border-border">
+            <div class="section-num mb-4">02</div>
+            <h2 class="text-3xl font-bold mb-6">A block that doesn't want to move</h2>
+
+            <p class="text-lg text-textSecondary mb-8">
+                Before any equations, look at this. Just look.
+            </p>
+
+            <figure class="mb-10">
+                <img src="../triangular_pulse_block.png"
+                     alt="Three-panel plot: force pulse, velocity response, and position of a block on a rough surface"
+                     class="w-full rounded-xl border border-border">
+            </figure>
+
+            <p class="text-textSecondary mb-6">
+                Three curves. One story.
+            </p>
+
+            <p class="text-textSecondary mb-6">
+                <strong class="text-textPrimary">Top panel:</strong> a force that rises, peaks,
+                and falls — a symmetric triangle. Two horizontal lines mark two friction
+                thresholds: static (red dashed) and kinetic (orange dotted).
+            </p>
+
+            <p class="text-textSecondary mb-6">
+                <strong class="text-textPrimary">Middle panel:</strong> the velocity. Nothing,
+                nothing, nothing — then a sudden ramp up that continues <em>past</em> the force peak.
+                The block accelerates even as the force declines. Then it slowly brakes to a stop.
+            </p>
+
+            <p class="text-textSecondary mb-8">
+                <strong class="text-textPrimary">Bottom panel:</strong> the position. Flat, then a
+                steep S-curve, then a plateau. The block slides about 12 meters total.
+            </p>
+
+            <div class="callout-wonder p-5 rounded-r-lg mb-8">
+                <p class="font-semibold text-purple mb-2">Three questions to sit with</p>
+                <ol class="text-sm text-textSecondary space-y-2 list-decimal list-inside">
+                    <li>Why does the block wait so long before moving? The force starts at t = 1 but the block doesn't budge until t ≈ 2.3.</li>
+                    <li>Why does peak velocity happen <em>after</em> peak force? The force peaks at t = 3, but velocity peaks near t = 4.2.</li>
+                    <li>Why does the block slide so far? The force pulse lasts 4 seconds, but the block keeps moving until about t = 7.</li>
+                </ol>
+            </div>
+
+            <p class="text-textSecondary">
+                Every one of these questions has a crisp answer. And every answer lives in
+                the gap between two numbers: μ<sub class="text-accent">s</sub> and
+                μ<sub class="text-accent">k</sub>.
+            </p>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- IV. THE HONEST EQUATION -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="honest-equation" class="py-20 border-b border-border">
+            <div class="section-num mb-4">03</div>
+            <h2 class="text-3xl font-bold mb-6">The honest equation</h2>
+
+            <p class="text-textSecondary mb-6">
+                Now we can talk about the math — because you already know what it
+                needs to explain.
+            </p>
+
+            <p class="text-textSecondary mb-6">
+                Static friction isn't a force. It's a <em>constraint</em>. It gives exactly
+                what's needed to keep the block still, up to a maximum of μ<sub>s</sub>mg.
+                The block doesn't move until the applied force <em>exceeds</em> that maximum.
+                That's why it waits — the force has to climb from zero past the threshold.
+            </p>
+
+            <p class="text-textSecondary mb-8">
+                The moment the block breaks free, friction drops from μ<sub>s</sub>mg to
+                μ<sub>k</sub>mg. That drop — from 9.81 N to 5.89 N — is why the block
+                overshoots so dramatically. It needed a big force to start, but once moving,
+                it faces much less resistance.
+            </p>
+
+            <h3 class="text-xl font-semibold mb-4">The four phases</h3>
+
+            <div class="space-y-3 mb-8">
+                <div class="flex items-start gap-4 bg-surface p-4 rounded-lg border border-border">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-blue/20 text-blue flex items-center justify-center text-sm font-bold font-mono">I</span>
+                    <div>
+                        <p class="font-medium text-sm">Static equilibrium <span class="text-textMuted font-mono text-xs ml-2">0 ≤ t < 2.31</span></p>
+                        <p class="text-textSecondary text-sm">Nothing happens. Friction absorbs the force perfectly. The acceleration is exactly zero.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 bg-surface p-4 rounded-lg border border-border">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-purple/20 text-purple flex items-center justify-center text-sm font-bold font-mono">II</span>
+                    <div>
+                        <p class="font-medium text-sm">Sliding, force rising <span class="text-textMuted font-mono text-xs ml-2">2.31 ≤ t ≤ 3</span></p>
+                        <p class="text-textSecondary text-sm">The block breaks free. Kinetic friction (5.89 N) is much less than the applied force — strong net acceleration.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 bg-surface p-4 rounded-lg border border-border">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-sm font-bold font-mono">III</span>
+                    <div>
+                        <p class="font-medium text-sm">Sliding, force falling <span class="text-textMuted font-mono text-xs ml-2">3 < t ≤ 4.22</span></p>
+                        <p class="text-textSecondary text-sm">Force is declining but still above kinetic friction. The block is <em>still accelerating</em>. This is why peak velocity comes after peak force.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4 bg-surface p-4 rounded-lg border border-border">
+                    <span class="flex-shrink-0 w-8 h-8 rounded-full bg-orange/20 text-orange flex items-center justify-center text-sm font-bold font-mono">IV</span>
+                    <div>
+                        <p class="font-medium text-sm">Friction braking <span class="text-textMuted font-mono text-xs ml-2">t > 4.22</span></p>
+                        <p class="text-textSecondary text-sm">Applied force drops below kinetic friction. The block decelerates. After t = 5, it's pure friction braking: ẍ = −μ<sub>k</sub>g.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold mb-4">The dimensionless collapse</h3>
+
+            <p class="text-textSecondary mb-4">
+                Here's the beautiful part. The entire problem — all four phases, all the
+                dynamics — collapses to just two dimensionless numbers:
+            </p>
+
+            <div class="equation mb-4">
+                <span class="text-blue">α</span> = μ<sub>s</sub>mg / F<sub>max</sub>
+                <span class="text-textMuted mx-4">&</span>
+                <span class="text-purple">β</span> = μ<sub>k</sub>mg / F<sub>max</sub>
+            </div>
+
+            <p class="text-textSecondary text-sm">
+                How long the block sits still, how far past the peak it accelerates, how far it
+                slides — everything is controlled by α and β. Change the mass, change gravity,
+                change the force — if α and β stay the same, the physics is identical.
+            </p>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- V. TEACHING A COMPUTER TO FEEL FRICTION -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="teaching-friction" class="py-20 border-b border-border">
+            <div class="section-num mb-4">04</div>
+            <h2 class="text-3xl font-bold mb-6">Teaching a computer to feel friction</h2>
+
+            <p class="text-textSecondary mb-6">
+                The derivation is done. Now we need to tell a computer about it. This is
+                where <span class="skill-badge">/ode-problem-julia</span> comes in — one
+                command that reads the physics and produces a solvable ODE.
+            </p>
+
+            <p class="text-textSecondary mb-8">
+                The second-order equation becomes a first-order system:
+                u<sub>1</sub> = position, u<sub>2</sub> = velocity. The stick-slip
+                transition lives in a conditional branch inside the right-hand side function:
+            </p>
+
+            <pre class="mb-6"><code class="language-julia">function f!(du, u, p, t)
+    m, μₛ, μₖ, g, Fmax = p
+
+    v = u[2]        # velocity
+    F = F_pulse(t, Fmax)
+    fₛ = μₛ * m * g # max static friction
+    fₖ = μₖ * m * g # kinetic friction
+
+    if v ≤ 0.0 && F ≤ fₛ
+        # Stuck: static friction balances applied force
+        du[1] = 0.0
+        du[2] = 0.0
+    else
+        # Sliding: kinetic friction opposes motion
+        du[1] = v
+        du[2] = (F - fₖ) / m
+    end
+end</code></pre>
+
+            <div class="callout-insight p-5 rounded-r-lg">
+                <p class="font-semibold text-green mb-2">The subtle line</p>
+                <p class="text-sm text-textSecondary">
+                    <code class="text-green">if v ≤ 0.0 && F ≤ fₛ</code> — this single line
+                    encodes the entire friction model. Both derivatives must be zeroed when stuck,
+                    not just the acceleration. If you only zero du[2] but leave du[1] = v,
+                    numerical noise in v will drift the position. The block would
+                    "creep" even while supposedly stuck.
+                </p>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- VI. THE COMPUTER LIED TO US -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="the-lie" class="py-20 border-b border-border">
+            <div class="section-num mb-4">05</div>
+            <h2 class="text-3xl font-bold mb-8">The computer lied to us</h2>
+
+            <p class="text-lg text-textSecondary mb-6">
+                This is the most important part of the entire lesson. Not the equations. Not
+                the code. <em>This.</em>
+            </p>
+
+            <p class="text-textSecondary mb-6">
+                We defined the problem. We called the solver. It ran. It returned
+                <code class="text-green">Success</code>. And it gave us this:
+            </p>
+
+            <div class="terminal mb-8">
+                <div class="dim">ODE solved successfully:</div>
+                <div>&nbsp;&nbsp;retcode &nbsp;= <span class="ok">Success</span></div>
+                <div>&nbsp;&nbsp;t length = <span class="bad">8</span></div>
+                <div>&nbsp;&nbsp;t range &nbsp;= [0.0, 8.0]</div>
+                <div>&nbsp;&nbsp;u(0) &nbsp;&nbsp;&nbsp;= [0.0, 0.0]</div>
+                <div>&nbsp;&nbsp;u(end) &nbsp;&nbsp;= [<span class="bad">0.0, 0.0</span>]</div>
+            </div>
+
+            <div class="feynman-voice">
+                Eight time points. The block never moved. The solver said "Success" and gave
+                us the wrong answer. Think about that for a moment.
+            </div>
+
+            <p class="text-textSecondary mb-6">
+                The solver didn't crash. It didn't warn us. It completed in microseconds,
+                returned a green checkmark, and told us that a block hit by a 15-newton force
+                pulse just... sat there. It was <em>confidently, silently wrong</em>.
+            </p>
+
+            <div class="callout-trap p-6 rounded-r-lg mb-8">
+                <p class="font-semibold text-red text-lg mb-3">What happened</p>
+                <p class="text-textSecondary mb-3">
+                    The right-hand side is identically <code class="text-red">[0, 0]</code> during
+                    the stuck phase. The adaptive Tsit5 stepper evaluates the derivatives, sees
+                    zeros, and concludes: <em>"nothing is changing — I can take a huge step."</em>
+                </p>
+                <p class="text-textSecondary mb-3">
+                    It leaps from t = 0 to well past t = 5 in a single step. It never evaluates
+                    F(t) at a time where the force exceeds the friction threshold. The entire
+                    triangular pulse — all four seconds of it — is invisible to the integrator.
+                </p>
+                <p class="text-textSecondary font-medium">
+                    The solver did exactly what it was designed to do. It took big steps when
+                    the derivatives were zero. The problem is that the derivatives <em>changed</em>
+                    in between those steps, and nobody told the solver to look.
+                </p>
+            </div>
+
+            <p class="text-textSecondary mb-6">
+                This is a general hazard with switching ODEs: <strong class="text-textPrimary">adaptive
+                solvers can step right over a discontinuity if the right-hand side is flat on
+                both sides of it.</strong> The solver isn't broken. The formulation is incomplete.
+                We told the computer about the physics, but we didn't tell it about the
+                <em>geography</em> of the physics — where the interesting parts are.
+            </p>
+
+            <p class="text-textSecondary">
+                A student who gets <code>Success</code> and stops here publishes a paper
+                saying the block doesn't move. An expert knows that <code>Success</code>
+                only means "I didn't crash" — not "I'm right."
+            </p>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- VII. NOW WE'RE TALKING -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="now-were-talking" class="py-20 border-b border-border">
+            <div class="section-num mb-4">06</div>
+            <h2 class="text-3xl font-bold mb-6">Now we're talking</h2>
+
+            <p class="text-textSecondary mb-6">
+                The fix is two keywords:
+            </p>
+
+            <pre class="mb-6"><code class="language-julia">sol = solve(prob, Tsit5(),
+            tstops=[1.0, 3.0, 5.0],  # force the solver to step here
+            dtmax=0.01)              # cap the step size</code></pre>
+
+            <p class="text-textSecondary mb-6">
+                <code class="text-blue">tstops</code> tells the integrator: "I know there are
+                discontinuities at t = 1, 3, 5. Step there, no matter what." And
+                <code class="text-blue">dtmax</code> caps the step size so the solver can't
+                leap over the breakaway transition.
+            </p>
+
+            <div class="terminal mb-8">
+                <div class="dim">ODE solved successfully:</div>
+                <div>&nbsp;&nbsp;retcode &nbsp;= <span class="ok">Success</span></div>
+                <div>&nbsp;&nbsp;t length = <span class="ok">814</span></div>
+                <div>&nbsp;&nbsp;t range &nbsp;= [0.0, 8.0]</div>
+                <div>&nbsp;&nbsp;u(0) &nbsp;&nbsp;&nbsp;= [0.0, 0.0]</div>
+                <div>&nbsp;&nbsp;u(end) &nbsp;&nbsp;= [<span class="ok">11.845, ≈0.0</span>]</div>
+            </div>
+
+            <p class="text-textSecondary mb-8">
+                814 time points. The block slides 11.85 meters. The final velocity is
+                10<sup>−5</sup> — numerical residual. The block came cleanly to rest.
+                <em>Now</em> we're talking.
+            </p>
+
+            <figure class="mb-8">
+                <img src="../triangular_pulse_block.png"
+                     alt="Three-panel plot showing the complete dynamics of the block"
+                     class="w-full rounded-xl border border-border">
+                <figcaption class="text-xs text-textMuted mt-3 text-center">
+                    Force (top), velocity (middle), position (bottom). Red dashed = static friction,
+                    orange dotted = kinetic friction. Gray lines mark t<sub>1</sub> and t<sub>2</sub>.
+                </figcaption>
+            </figure>
+
+            <div class="callout-insight p-5 rounded-r-lg">
+                <p class="font-semibold text-green mb-2">The deeper lesson</p>
+                <p class="text-sm text-textSecondary">
+                    The failure was more valuable than a clean first run would have been.
+                    A clean run teaches you nothing — it just confirms the code works.
+                    The failure taught us something real about how adaptive integrators interact
+                    with hybrid dynamics. That lesson became a section in the final report.
+                    The pipeline doesn't just produce results. It produces <em>understanding</em>.
+                </p>
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- VIII. AND THEN, THE WEATHER -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="and-then" class="py-20 border-b border-border">
+            <div class="section-num mb-4">07</div>
+            <h2 class="text-3xl font-bold mb-6">And then, the weather</h2>
+
+            <p class="text-lg text-textSecondary mb-6">
+                Here's where the story takes a turn that no tutorial would include.
+            </p>
+
+            <p class="text-textSecondary mb-6">
+                Immediately after publishing the 8-page physics report to GitHub, the
+                same terminal — same session, same conversation — was used to check the
+                weather. Not as a joke. As a real, personalized briefing:
+            </p>
+
+            <div class="bg-surface rounded-xl border border-border overflow-hidden mb-8">
+                <div class="p-4 border-b border-border flex items-center gap-3">
+                    <span class="skill-badge bg-gradient-to-r from-orange to-amber-500">/checkweather</span>
+                    <span class="text-sm text-textSecondary">Iowa City — April 8, 2026</span>
+                </div>
+                <div class="p-4 space-y-0">
+                    <div class="weather-row flex justify-between py-2 text-sm">
+                        <span class="text-textSecondary">Temperature</span>
+                        <span class="font-mono">72.8°F / 22.7°C</span>
+                    </div>
+                    <div class="weather-row flex justify-between py-2 text-sm">
+                        <span class="text-textSecondary">Wind</span>
+                        <span class="font-mono">22.7 mph, gusts 36.7</span>
+                    </div>
+                    <div class="weather-row flex justify-between py-2 text-sm">
+                        <span class="text-textSecondary">Best walking window</span>
+                        <span class="font-mono text-green">7–9 PM</span>
+                    </div>
+                    <div class="weather-row flex justify-between py-2 text-sm">
+                        <span class="text-textSecondary">Best running window</span>
+                        <span class="font-mono text-green">8 PM</span>
+                    </div>
+                    <div class="weather-row flex justify-between py-2 text-sm">
+                        <span class="text-textSecondary">Remote coding mode</span>
+                        <span class="font-mono text-purple">POWER MODE 7–9 PM</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feynman-voice">
+                The weather briefing isn't a gimmick bolted onto a physics tool. It's proof
+                that the platform has no walls. The same session that derived a piecewise ODE
+                can check the humidity, plan a run, and advise on phone screen brightness for
+                outdoor coding — because <em>it's all just context in one conversation</em>.
+            </div>
+
+            <p class="text-textSecondary mb-6">
+                This is the moment the lesson shifts from "here's a nice workflow for ODEs"
+                to something bigger. The skills aren't physics tools. They're <em>thinking
+                tools</em>. And thinking doesn't stop at the boundaries of a single discipline.
+            </p>
+
+            <p class="text-textSecondary">
+                A physicist who can derive, solve, plot, publish, and plan her evening run
+                in one unbroken session is not just more efficient. She is more <em>present</em>
+                in her work. Every context switch is a chance for the thread to break. No
+                switches, no breaks.
+            </p>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- IX. THE PIPELINE — AS VOCABULARY -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section id="what-this-means" class="py-20 border-b border-border">
+            <div class="section-num mb-4">08</div>
+            <h2 class="text-3xl font-bold mb-8">What this means</h2>
+
+            <p class="text-textSecondary mb-8">
+                This is not a story about one physics problem. It's a story about what
+                happens when you give a physicist a <em>vocabulary</em> for computation.
+            </p>
+
+            <div class="space-y-6 mb-10">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-blue/20 text-blue flex items-center justify-center text-sm font-bold">1</div>
+                    <div>
+                        <h3 class="font-semibold mb-1">Skills mirror cognitive steps</h3>
+                        <p class="text-sm text-textSecondary">
+                            <code class="text-blue">/latex</code> = derive it.
+                            <code class="text-purple">/ode-problem-julia</code> = formulate it.
+                            <code class="text-accent">/ode-solve-julia</code> = solve it.
+                            <code class="text-green">/plot-julia</code> = see it.
+                            Each command maps to how a physicist <em>thinks</em>, not how a
+                            computer organizes files.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-purple/20 text-purple flex items-center justify-center text-sm font-bold">2</div>
+                    <div>
+                        <h3 class="font-semibold mb-1">Failures become sections, not setbacks</h3>
+                        <p class="text-sm text-textSecondary">
+                            The solver's silent failure didn't derail the session — it became the
+                            most valuable section of the final report. The pipeline doesn't just
+                            tolerate debugging; it <em>incorporates</em> it.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-green/20 text-green flex items-center justify-center text-sm font-bold">3</div>
+                    <div>
+                        <h3 class="font-semibold mb-1">Composable primitives compound</h3>
+                        <p class="text-sm text-textSecondary">
+                            Each skill works alone, but the power is in chaining. The output of
+                            <code>/latex</code> feeds <code>/ode-problem-julia</code>, which feeds
+                            <code>/ode-solve-julia</code>, which feeds <code>/plot-julia</code>,
+                            which feeds back into <code>/latex</code>. The second problem takes
+                            minutes because the vocabulary is already built.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-8 h-8 rounded-full bg-orange/20 text-orange flex items-center justify-center text-sm font-bold">4</div>
+                    <div>
+                        <h3 class="font-semibold mb-1">The platform has no walls</h3>
+                        <p class="text-sm text-textSecondary">
+                            The same session that solved a hybrid ODE checked the weather, planned a
+                            walking route, and advised on phone battery management. There is no
+                            category boundary. There are only skills.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feynman-voice">
+                The next frontier is obvious: <span class="not-italic font-mono text-base text-blue">/bifurcation-diagram</span>,
+                <span class="not-italic font-mono text-base text-purple">/parameter-sweep</span>,
+                <span class="not-italic font-mono text-base text-green">/stability-analysis</span>,
+                <span class="not-italic font-mono text-base text-orange">/animate-solution</span>.
+                Every recurring pattern in a physicist's workflow becomes a one-word command.
+                The vocabulary grows. The friction disappears. And the physics gets closer.
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════ -->
+        <!-- X. CODA -->
+        <!-- ════════════════════════════════════════════════════ -->
+        <section class="py-20">
+            <div class="text-center max-w-2xl mx-auto">
+                <p class="text-textMuted text-sm font-mono mb-6 tracking-wider uppercase">The session</p>
+                <div class="space-y-3 text-sm font-mono text-textSecondary mb-10">
+                    <p><span class="text-blue">→</span> Derived the governing ODE <span class="text-textMuted">(6-page PDF)</span></p>
+                    <p><span class="text-purple">→</span> Formulated the ODEProblem in Julia</p>
+                    <p><span class="text-red">→</span> Solved it — failed — diagnosed — fixed</p>
+                    <p><span class="text-green">→</span> Plotted the 3-panel figure</p>
+                    <p><span class="text-orange">→</span> Wrote the 8-page report</p>
+                    <p><span class="text-orange">→</span> Published to GitHub</p>
+                    <p><span class="text-blue">→</span> Checked today's weather</p>
+                    <p><span class="text-purple">→</span> Checked tomorrow's weather</p>
+                    <p><span class="text-green">→</span> Built this webpage</p>
+                    <p class="text-textMuted pt-2">One terminal. One conversation. No context switches.</p>
+                </div>
+
+                <a href="https://github.com/VivekKarmarkar/latex-skills-test"
+                   class="inline-block bg-surface border border-border text-textSecondary hover:text-textPrimary hover:border-blue/50 px-6 py-3 rounded-lg text-sm font-mono transition-all">
+                    View source on GitHub →
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- FOOTER -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <footer class="border-t border-border py-10">
+        <div class="max-w-3xl mx-auto px-6 text-center">
+            <p class="text-textMuted text-xs">
+                Built in a single Claude Code session — April 8, 2026
+            </p>
+        </div>
+    </footer>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- SCROLL ANIMATION -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Active nav
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('nav a');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+            navLinks.forEach(link => {
+                const active = link.getAttribute('href') === '#' + current;
+                link.classList.toggle('text-textPrimary', active);
+                link.classList.toggle('font-semibold', active);
+            });
+        });
+    </script>
+
+</body>
+</html>
