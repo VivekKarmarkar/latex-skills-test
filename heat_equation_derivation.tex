@@ -1,0 +1,315 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{\partial #2^2}}
+\newcommand{\divergence}{\nabla\!\cdot\!}
+
+\title{Derivation of the Heat Equation from Fourier's Law\\[6pt]
+\large From First Principles in 1D, 3D, and with Source Terms}
+\author{Claude Opus 4.6}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+%% ============================================================
+\section{Physical Setup}
+
+Consider a solid body occupying a domain $\Omega \subset \mathbb{R}^d$ with temperature field $u(\mathbf{x}, t)$.
+We derive the governing PDE from two independent principles:
+
+\begin{enumerate}
+  \item \textbf{Fourier's Law} --- a constitutive (empirical) relation linking heat flux to temperature gradient.
+  \item \textbf{Conservation of Energy} --- a fundamental balance law applied to an arbitrary control volume.
+\end{enumerate}
+
+Material properties:
+\begin{align}
+  \rho &= \text{mass density} \quad [\text{kg/m}^3] \\
+  c_p &= \text{specific heat capacity} \quad [\text{J/(kg\,K)}] \\
+  k &= \text{thermal conductivity} \quad [\text{W/(m\,K)}]
+\end{align}
+
+We assume $\rho$, $c_p$, and $k$ are constant (homogeneous, isotropic material).
+
+%% ============================================================
+\section{Fourier's Law of Heat Conduction}
+
+\begin{tcolorbox}[colback=blue!5, colframe=blue!50!black, title=Fourier's Law (Constitutive Relation)]
+The heat flux vector $\mathbf{q}$ is proportional to the negative temperature gradient:
+\begin{equation}
+  \boxed{\mathbf{q} = -k\,\nabla u}
+  \label{eq:fourier}
+\end{equation}
+where $\mathbf{q}$ has units $[\text{W/m}^2]$ and points in the direction of decreasing temperature.
+\end{tcolorbox}
+
+\medskip
+\noindent
+\textbf{Physical meaning:} heat flows from hot to cold. The negative sign ensures that when
+$\nabla u$ points toward increasing temperature, the flux $\mathbf{q}$ points the opposite way.
+
+\medskip
+\noindent
+In 1D, Fourier's law reduces to:
+\begin{equation}
+  q = -k\,\pd{u}{x}
+  \label{eq:fourier_1d}
+\end{equation}
+
+%% ============================================================
+\section{Conservation of Energy}
+
+\subsection{The integral form}
+
+Consider an arbitrary control volume $V \subset \Omega$ with boundary surface $\partial V$ and outward unit normal $\hat{\mathbf{n}}$.
+
+\medskip
+\noindent
+\textbf{Rate of internal energy change} in $V$:
+\begin{equation}
+  \frac{d}{dt}\int_V \rho\, c_p\, u \;\, dV
+\end{equation}
+
+\noindent
+\textbf{Net heat flux into} $V$ through $\partial V$ (flux \emph{into} = negative of outward flux):
+\begin{equation}
+  -\oint_{\partial V} \mathbf{q} \cdot \hat{\mathbf{n}} \;\, dS
+\end{equation}
+
+\noindent
+\textbf{Volumetric heat source} (e.g., chemical reaction, radiation, Joule heating):
+\begin{equation}
+  \int_V f(\mathbf{x}, t) \;\, dV
+\end{equation}
+
+\medskip
+\noindent
+Energy conservation states:
+\begin{tcolorbox}[colback=green!5, colframe=green!50!black, title=Integral Energy Balance]
+\begin{equation}
+  \frac{d}{dt}\int_V \rho\, c_p\, u \;\, dV
+  = -\oint_{\partial V} \mathbf{q} \cdot \hat{\mathbf{n}} \;\, dS
+  + \int_V f \;\, dV
+  \label{eq:energy_integral}
+\end{equation}
+\end{tcolorbox}
+
+\subsection{Converting to differential form}
+
+\textbf{Step 1:} Since $\rho$ and $c_p$ are constant and $V$ is fixed, move the time derivative inside:
+\begin{equation}
+  \int_V \rho\, c_p\, \pd{u}{t} \;\, dV
+  = -\oint_{\partial V} \mathbf{q} \cdot \hat{\mathbf{n}} \;\, dS
+  + \int_V f \;\, dV
+\end{equation}
+
+\textbf{Step 2:} Apply the divergence theorem to the surface integral:
+\begin{equation}
+  \oint_{\partial V} \mathbf{q} \cdot \hat{\mathbf{n}} \;\, dS
+  = \int_V \divergence \mathbf{q} \;\, dV
+\end{equation}
+
+\textbf{Step 3:} Combine everything under one volume integral:
+\begin{equation}
+  \int_V \left[\rho\, c_p\, \pd{u}{t} + \divergence \mathbf{q} - f\right] dV = 0
+  \label{eq:integral_combined}
+\end{equation}
+
+\textbf{Step 4:} Since $V$ is \emph{arbitrary}, the integrand itself must vanish:
+\begin{equation}
+  \boxed{\rho\, c_p\, \pd{u}{t} = -\divergence \mathbf{q} + f}
+  \label{eq:energy_diff}
+\end{equation}
+
+This is the \textbf{differential form of energy conservation} --- valid for \emph{any} constitutive law for $\mathbf{q}$.
+
+%% ============================================================
+\section{Combining: The Heat Equation}
+
+\subsection{Step 1: Substitute Fourier's law into conservation}
+
+Insert \eqref{eq:fourier} into \eqref{eq:energy_diff}:
+\begin{align}
+  \rho\, c_p\, \pd{u}{t} &= -\divergence(-k\,\nabla u) + f \\[6pt]
+                          &= k\,\divergence(\nabla u) + f \\[6pt]
+                          &= k\,\nabla^2 u + f
+\end{align}
+
+\subsection{Step 2: Define thermal diffusivity}
+
+\begin{equation}
+  \boxed{\alpha \;=\; \frac{k}{\rho\, c_p}}
+  \qquad [\text{m}^2/\text{s}]
+  \label{eq:alpha}
+\end{equation}
+
+\subsection{Step 3: Divide through by $\rho\,c_p$}
+
+\begin{tcolorbox}[colback=red!5, colframe=red!50!black, title=The Heat Equation (General Form)]
+\begin{equation}
+  \boxed{\pd{u}{t} = \alpha\,\nabla^2 u + \frac{f}{\rho\, c_p}}
+  \label{eq:heat_general}
+\end{equation}
+\end{tcolorbox}
+
+\noindent
+Without sources ($f = 0$), this reduces to the \textbf{homogeneous heat equation}:
+
+\begin{tcolorbox}[colback=red!5, colframe=red!50!black, title=The Heat Equation (Homogeneous)]
+\begin{equation}
+  \boxed{\pd{u}{t} = \alpha\,\nabla^2 u}
+  \label{eq:heat_homogeneous}
+\end{equation}
+\end{tcolorbox}
+
+%% ============================================================
+\section{Explicit Forms by Dimension}
+
+\subsection{1D Heat Equation}
+
+The Laplacian reduces to $\nabla^2 u = \pdd{u}{x}$:
+\begin{equation}
+  \boxed{\pd{u}{t} = \alpha\,\pdd{u}{x}}
+  \label{eq:heat_1d}
+\end{equation}
+
+This is the most commonly encountered form. It governs temperature evolution in a thin rod or slab.
+
+\subsection{2D Heat Equation}
+
+\begin{equation}
+  \pd{u}{t} = \alpha\!\left(\pdd{u}{x} + \pdd{u}{y}\right)
+  \label{eq:heat_2d}
+\end{equation}
+
+\subsection{3D Heat Equation}
+
+\begin{equation}
+  \pd{u}{t} = \alpha\!\left(\pdd{u}{x} + \pdd{u}{y} + \pdd{u}{z}\right)
+  \label{eq:heat_3d}
+\end{equation}
+
+%% ============================================================
+\section{The 1D Derivation from Scratch (Self-Contained)}
+
+For clarity, we re-derive the 1D case directly without vector calculus.
+
+\medskip
+\noindent
+Consider a thin rod along the $x$-axis. Take a small element $[x,\, x + \Delta x]$.
+
+\subsection{Step 1: Heat flux at each face}
+
+By Fourier's law \eqref{eq:fourier_1d}:
+\begin{align}
+  q(x,t) &= -k\,\pd{u}{x}\bigg|_x
+    &\text{(flux entering at left face)} \\[6pt]
+  q(x+\Delta x,t) &= -k\,\pd{u}{x}\bigg|_{x+\Delta x}
+    &\text{(flux leaving at right face)}
+\end{align}
+
+\subsection{Step 2: Net heat flow into the element}
+
+Net rate of heat flowing \emph{into} the element (left flux in minus right flux out):
+\begin{equation}
+  \dot{Q}_{\text{net}} = A\bigl[q(x,t) - q(x+\Delta x,t)\bigr]
+\end{equation}
+where $A$ is the cross-sectional area.
+
+\subsection{Step 3: Rate of internal energy change}
+
+\begin{equation}
+  \dot{E} = \rho\, c_p\, A\,\Delta x\;\pd{u}{t}
+\end{equation}
+
+\subsection{Step 4: Energy balance}
+
+Setting $\dot{E} = \dot{Q}_{\text{net}}$:
+\begin{equation}
+  \rho\, c_p\, A\,\Delta x\;\pd{u}{t}
+  = A\bigl[q(x,t) - q(x+\Delta x,t)\bigr]
+\end{equation}
+
+Cancel $A$ and divide by $\Delta x$:
+\begin{equation}
+  \rho\, c_p\,\pd{u}{t}
+  = -\frac{q(x+\Delta x,t) - q(x,t)}{\Delta x}
+\end{equation}
+
+\subsection{Step 5: Take the limit $\Delta x \to 0$}
+
+The right side is the negative of the definition of the partial derivative:
+\begin{equation}
+  \rho\, c_p\,\pd{u}{t} = -\pd{q}{x}
+  \label{eq:1d_cons}
+\end{equation}
+
+\subsection{Step 6: Substitute Fourier's law}
+
+From \eqref{eq:fourier_1d}: $q = -k\,\partial u / \partial x$, so
+\begin{align}
+  -\pd{q}{x} &= -\pd{}{x}\!\left(-k\,\pd{u}{x}\right) \\[6pt]
+              &= k\,\pdd{u}{x}
+\end{align}
+
+Therefore:
+\begin{equation}
+  \rho\, c_p\,\pd{u}{t} = k\,\pdd{u}{x}
+  \qquad\Longrightarrow\qquad
+  \boxed{\pd{u}{t} = \alpha\,\pdd{u}{x}}
+\end{equation}
+which recovers \eqref{eq:heat_1d} exactly.
+
+%% ============================================================
+\section{Summary of the Derivation Logic}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{l|l|l}
+  \hline
+  \textbf{Ingredient} & \textbf{Equation} & \textbf{Type} \\
+  \hline
+  Fourier's law & $\mathbf{q} = -k\,\nabla u$ & Constitutive (empirical) \\
+  Energy conservation & $\rho c_p\,\partial_t u = -\divergence\mathbf{q} + f$ & Balance law (fundamental) \\
+  \hline
+  \textbf{Heat equation} & $\partial_t u = \alpha\,\nabla^2 u + f/(\rho c_p)$ & \textbf{Transport PDE} \\
+  \hline
+\end{tabular}
+\end{center}
+
+%% ============================================================
+\section{Key Observations}
+
+\begin{enumerate}
+  \item \textbf{Parabolic character.}
+    The heat equation is first-order in time and second-order in space.
+    This makes it a \emph{parabolic} PDE, with infinite propagation speed ---
+    a disturbance is felt everywhere instantly (though exponentially attenuated).
+
+  \item \textbf{Diffusion, not advection.}
+    The heat equation is the prototype for all diffusion processes.
+    The same PDE governs mass diffusion (Fick's law $\to$ diffusion equation),
+    with $\alpha$ replaced by the mass diffusivity $D$.
+
+  \item \textbf{The recipe generalizes.}
+    \emph{Constitutive law} + \emph{Conservation law} $=$ \emph{PDE}.
+    Replace Fourier's law with Hooke's law $\to$ wave equation.
+    Replace it with Fick's law $\to$ diffusion equation.
+    Add Newton's second law and viscous stress $\to$ Navier--Stokes.
+
+  \item \textbf{Thermal diffusivity $\alpha$} is the single material parameter.
+    High $k$ (good conductor) $\Rightarrow$ large $\alpha$ $\Rightarrow$ fast diffusion.
+    High $\rho c_p$ (large thermal inertia) $\Rightarrow$ small $\alpha$ $\Rightarrow$ slow response.
+
+  \item \textbf{Variable conductivity.}
+    If $k = k(\mathbf{x})$, the derivation still holds but \eqref{eq:heat_general} becomes
+    $\partial_t u = \frac{1}{\rho c_p}\divergence(k\,\nabla u) + f/(\rho c_p)$,
+    and the Laplacian can no longer be factored out.
+\end{enumerate}
+
+\end{document}

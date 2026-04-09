@@ -1,0 +1,19 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.bbl
+*.blg
+*.toc
+
+# OS
+.DS_Store
+*.swp
+*~
+
+# Environment
+.env
+.env.local

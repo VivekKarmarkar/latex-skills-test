@@ -1,0 +1,349 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+
+\newcommand{\dd}[2]{\frac{d #1}{d #2}}
+\newcommand{\ddd}[2]{\frac{d^2 #1}{d #2^2}}
+
+\title{Block on a Rough Surface Under a Triangular Force Pulse\\[6pt]
+\large Governing ODE with Static/Kinetic Friction Transitions}
+\author{Claude Opus 4.6}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+%% ============================================================
+\section{Problem Setup}
+
+\begin{tcolorbox}[colback=blue!5, colframe=blue!50!black, title=Physical System]
+A block of mass $m$ sits at rest on a rough horizontal surface.  Starting at $t = 1\;\text{s}$, a horizontal force $F(t)$ is applied as a \textbf{single symmetric triangular pulse} with peak at $t = 3\;\text{s}$.  The peak force $F_{\max}$ exceeds the maximum static friction $f_s = \mu_s m g$.  The pulse ends at $t = 5\;\text{s}$.  We seek $x(t)$, the position of the block.
+\end{tcolorbox}
+
+\medskip
+\noindent
+\textbf{Given parameters:}
+\begin{itemize}
+    \item Mass: $m$
+    \item Coefficients of friction: $\mu_s$ (static), $\mu_k$ (kinetic), with $\mu_k < \mu_s$
+    \item Gravitational acceleration: $g$
+    \item Peak applied force: $F_{\max} > \mu_s m g$
+    \item Pulse timing: starts at $t = 1$, peaks at $t = 3$, ends at $t = 5$ (all in seconds)
+\end{itemize}
+
+%% ============================================================
+\section{The Applied Force}
+
+The triangular pulse rises linearly from $0$ to $F_{\max}$ over $[1, 3]$, then falls linearly from $F_{\max}$ to $0$ over $[3, 5]$:
+
+\begin{equation}
+\boxed{
+F(t) =
+\begin{cases}
+0 & t < 1 \\[4pt]
+\displaystyle F_{\max}\,\frac{t - 1}{2} & 1 \le t \le 3 \\[8pt]
+\displaystyle F_{\max}\,\frac{5 - t}{2} & 3 < t \le 5 \\[4pt]
+0 & t > 5
+\end{cases}
+}
+\label{eq:Ft}
+\end{equation}
+
+\noindent
+Note that $F(1) = 0$, $F(3) = F_{\max}$, $F(5) = 0$, and the pulse is symmetric about $t = 3$.
+
+%% ============================================================
+\section{Friction Model}
+
+The friction force $f(t)$ depends on whether the block is stationary or sliding.
+
+\medskip
+\noindent
+\textbf{Static friction} (block at rest, $v = 0$):
+\begin{equation}
+f = F(t) \quad \text{provided } |F(t)| \le \mu_s m g
+\label{eq:static}
+\end{equation}
+Static friction exactly balances the applied force --- the block does not move.  Motion initiates when $F(t)$ first exceeds $\mu_s m g$.
+
+\medskip
+\noindent
+\textbf{Kinetic friction} (block sliding, $v > 0$):
+\begin{equation}
+f = \mu_k m g \quad \text{(opposing the direction of motion)}
+\label{eq:kinetic}
+\end{equation}
+
+\noindent
+Since $F(t) \ge 0$ and the block starts from rest, the velocity will always be $v \ge 0$ (the block only moves in the direction of the applied force).  So kinetic friction acts in the $-x$ direction whenever the block is sliding.
+
+%% ============================================================
+\section{Critical Times}
+
+\subsection{Onset of motion: $t = t_1$}
+
+The block begins to slide when $F(t)$ first exceeds the static friction limit.  During the rising phase ($1 \le t \le 3$):
+\begin{equation}
+F(t_1) = \mu_s m g
+\qquad\Longrightarrow\qquad
+F_{\max}\,\frac{t_1 - 1}{2} = \mu_s m g
+\end{equation}
+
+\begin{equation}
+\boxed{t_1 = 1 + \frac{2\,\mu_s m g}{F_{\max}}}
+\label{eq:t1}
+\end{equation}
+
+\noindent
+Since $F_{\max} > \mu_s m g$, we have $t_1 < 3$, confirming the block starts moving during the rising phase.  In fact, $1 < t_1 < 3$.
+
+\subsection{Force drops below kinetic friction: $t = t_2$}
+
+Once the block is sliding, friction is only $\mu_k m g < \mu_s m g$.  The net force on the block becomes zero when $F(t) = \mu_k m g$.  This happens on the \emph{falling} side of the pulse ($3 < t \le 5$):
+\begin{equation}
+F_{\max}\,\frac{5 - t_2}{2} = \mu_k m g
+\end{equation}
+
+\begin{equation}
+\boxed{t_2 = 5 - \frac{2\,\mu_k m g}{F_{\max}}}
+\label{eq:t2}
+\end{equation}
+
+\noindent
+For $t > t_2$, the applied force is less than kinetic friction, so friction decelerates the block.
+
+\medskip
+\noindent
+\textit{Note:} By the symmetry of the pulse, there is also a time on the rising side where $F(t) = \mu_k m g$.  But this occurs \emph{before} the block starts moving (since $\mu_k < \mu_s$), so it plays no dynamical role.
+
+%% ============================================================
+\section{Phases of Motion}
+
+The dynamics splits into four distinct phases:
+
+\begin{tcolorbox}[colback=green!5, colframe=green!50!black, title=Phase Summary]
+\begin{enumerate}
+    \item \textbf{Phase I:} $\;0 \le t < t_1$ --- Block at rest.  Static friction balances $F(t)$.
+    \item \textbf{Phase II:} $\;t_1 \le t \le 3$ --- Block sliding, force rising.  Net force accelerates block.
+    \item \textbf{Phase III:} $\;3 < t \le t_2$ --- Block sliding, force falling but still $> \mu_k mg$.  Block still accelerates (but less).
+    \item \textbf{Phase IV:} $\;t > t_2$ --- Applied force $< \mu_k mg$ (or zero).  Friction decelerates block until it stops.
+\end{enumerate}
+\end{tcolorbox}
+
+%% ============================================================
+\section{Governing ODE by Phase}
+
+Newton's second law in the horizontal direction:
+\begin{equation}
+m\,\ddd{x}{t} = F(t) - f(t)
+\label{eq:newton}
+\end{equation}
+
+\subsection{Phase I: $0 \le t < t_1$ (at rest)}
+
+\begin{equation}
+\boxed{\ddd{x}{t} = 0, \qquad x(t) = x_0, \qquad v(t) = 0}
+\end{equation}
+
+\noindent
+Nothing happens.  Static friction $f = F(t)$ exactly cancels the applied force.
+
+\subsection{Phase II: $t_1 \le t \le 3$ (sliding, force rising)}
+
+The applied force is $F(t) = F_{\max}(t-1)/2$ and kinetic friction acts:
+
+\begin{equation}
+m\,\ddd{x}{t} = F_{\max}\,\frac{t - 1}{2} - \mu_k m g
+\end{equation}
+
+\begin{equation}
+\boxed{\ddd{x}{t} = \frac{F_{\max}}{2m}(t - 1) - \mu_k g}
+\label{eq:phase2}
+\end{equation}
+
+\noindent
+with initial conditions $x(t_1) = x_0$, $\;\dot{x}(t_1) = 0$.
+
+\medskip
+\noindent
+\textbf{First integration} (velocity):
+\begin{align}
+v(t) &= \int_{t_1}^{t} \left[\frac{F_{\max}}{2m}(\tau - 1) - \mu_k g\right] d\tau \\[6pt]
+     &= \frac{F_{\max}}{2m}\left[\frac{(\tau-1)^2}{2}\right]_{t_1}^{t} - \mu_k g\,(t - t_1) \\[6pt]
+     &= \frac{F_{\max}}{4m}\left[(t-1)^2 - (t_1-1)^2\right] - \mu_k g\,(t - t_1)
+\label{eq:v_phase2}
+\end{align}
+
+\medskip
+\noindent
+\textbf{Second integration} (position):
+\begin{align}
+x(t) &= x_0 + \frac{F_{\max}}{4m}\int_{t_1}^{t}\left[(\tau-1)^2 - (t_1-1)^2\right]d\tau - \mu_k g\int_{t_1}^{t}(\tau - t_1)\,d\tau \\[6pt]
+     &= x_0 + \frac{F_{\max}}{4m}\left[\frac{(t-1)^3 - (t_1-1)^3}{3} - (t_1-1)^2(t - t_1)\right] - \frac{\mu_k g}{2}(t - t_1)^2
+\label{eq:x_phase2}
+\end{align}
+
+\subsection{Phase III: $3 < t \le t_2$ (sliding, force falling)}
+
+The applied force is now $F(t) = F_{\max}(5 - t)/2$:
+
+\begin{equation}
+\boxed{\ddd{x}{t} = \frac{F_{\max}}{2m}(5 - t) - \mu_k g}
+\label{eq:phase3}
+\end{equation}
+
+\noindent
+with initial conditions $x(3) = x_3$, $\;\dot{x}(3) = v_3$ obtained by evaluating \eqref{eq:v_phase2} and \eqref{eq:x_phase2} at $t = 3$.
+
+\medskip
+\noindent
+\textbf{First integration:}
+\begin{align}
+v(t) &= v_3 + \int_{3}^{t}\left[\frac{F_{\max}}{2m}(5 - \tau) - \mu_k g\right]d\tau \\[6pt]
+     &= v_3 + \frac{F_{\max}}{2m}\left[-(5-\tau)^2/2\,\Big|_{\,3}^{\,t}\right] - \mu_k g\,(t - 3) \\[6pt]
+     &= v_3 - \frac{F_{\max}}{4m}\left[(5-t)^2 - 4\right] - \mu_k g\,(t - 3)
+\label{eq:v_phase3}
+\end{align}
+
+\medskip
+\noindent
+\textbf{Second integration:}
+\begin{align}
+x(t) &= x_3 + v_3(t - 3) - \frac{F_{\max}}{4m}\left[-\frac{(5-t)^3 - 8}{3} - 4(t-3)\right] - \frac{\mu_k g}{2}(t-3)^2
+\end{align}
+
+\noindent
+which simplifies to:
+\begin{align}
+x(t) &= x_3 + v_3(t-3) + \frac{F_{\max}}{4m}\left[\frac{(5-t)^3 - 8}{3} + 4(t-3)\right] - \frac{\mu_k g}{2}(t-3)^2
+\label{eq:x_phase3}
+\end{align}
+
+\subsection{Phase IV: $t > t_2$ (deceleration to rest)}
+
+For $t_2 < t \le 5$, the applied force $F(t) < \mu_k mg$, and for $t > 5$, $F(t) = 0$.  In both sub-cases the net force opposes motion.
+
+\medskip
+\noindent
+\textbf{Sub-phase IVa:} $t_2 < t \le 5$ \quad(applied force still present but insufficient)
+\begin{equation}
+\ddd{x}{t} = \frac{F_{\max}}{2m}(5-t) - \mu_k g \quad < 0
+\label{eq:phase4a}
+\end{equation}
+
+\noindent
+(This is the same ODE as Phase III, but now the RHS is negative --- the block decelerates.)
+
+\medskip
+\noindent
+\textbf{Sub-phase IVb:} $t > 5$ \quad(no applied force, pure friction braking)
+\begin{equation}
+\boxed{\ddd{x}{t} = -\mu_k g}
+\label{eq:phase4b}
+\end{equation}
+
+\noindent
+with initial conditions from matching at $t = 5$.  The block decelerates uniformly until:
+\begin{equation}
+v(t_{\text{stop}}) = 0
+\qquad\Longrightarrow\qquad
+t_{\text{stop}} = 5 + \frac{v_5}{\mu_k g}
+\label{eq:tstop}
+\end{equation}
+where $v_5 = v(5)$ from Sub-phase IVa (if the block is still moving at $t = 5$).
+
+\medskip
+\noindent
+\textit{Important:} The block may stop \emph{during} Sub-phase IVa (before the pulse ends) if $v$ reaches zero while $t < 5$.  In that case, one must check whether static friction can hold the block at rest --- i.e., whether $F(t_{\text{stop}}) \le \mu_s mg$ at the instant of stopping.  If so, the block re-sticks and remains at rest.
+
+%% ============================================================
+\section{Compact ODE Summary}
+
+Defining the net acceleration $a(t)$ piecewise, the complete equation of motion is:
+
+\begin{tcolorbox}[colback=red!5, colframe=red!50!black, title=Complete Equation of Motion]
+\begin{equation}
+\boxed{
+m\,\ddot{x} =
+\begin{cases}
+0 & 0 \le t < t_1 \;\text{(static equilibrium)} \\[6pt]
+\displaystyle \frac{F_{\max}}{2}(t-1) - \mu_k m g & t_1 \le t \le 3 \;\text{(sliding, force rising)} \\[8pt]
+\displaystyle \frac{F_{\max}}{2}(5-t) - \mu_k m g & 3 < t \le 5 \;\text{(sliding, force falling)} \\[8pt]
+-\mu_k m g & t > 5 \;\text{(friction braking)}
+\end{cases}
+}
+\label{eq:master}
+\end{equation}
+
+\medskip
+\noindent
+\textbf{Subject to:}
+\begin{itemize}
+    \item $x(0) = x_0$, \;$\dot{x}(0) = 0$
+    \item The constraint $\dot{x}(t) \ge 0$ \;(the block cannot move backward under forward forcing)
+    \item The block re-sticks (returns to $\ddot{x} = 0$) whenever $\dot{x} \to 0^+$ and $F(t) \le \mu_s mg$
+\end{itemize}
+\end{tcolorbox}
+
+%% ============================================================
+\section{Dimensionless Form}
+
+\noindent
+It is natural to non-dimensionalize using the following scales:
+
+\begin{align}
+\hat{t} &= \frac{t - 1}{2}, \qquad \text{so } \hat{t} = 0 \text{ at pulse start, } \hat{t} = 1 \text{ at peak, } \hat{t} = 2 \text{ at pulse end} \\[6pt]
+\hat{x} &= \frac{x - x_0}{F_{\max}/(m \cdot 1\,\text{s}^{-2})}, \qquad \hat{F} = \frac{F}{F_{\max}}
+\end{align}
+
+\noindent
+Define the two key dimensionless ratios:
+\begin{equation}
+\boxed{
+\alpha = \frac{\mu_s m g}{F_{\max}} \quad (\text{static friction ratio}),
+\qquad
+\beta = \frac{\mu_k m g}{F_{\max}} \quad (\text{kinetic friction ratio})
+}
+\label{eq:dimless_params}
+\end{equation}
+
+\noindent
+The problem requires $\alpha < 1$ (the peak exceeds static friction) and $\beta < \alpha$ (kinetic $<$ static).
+
+\medskip
+\noindent
+In these variables, the triangular pulse is simply:
+\begin{equation}
+\hat{F}(\hat{t}) =
+\begin{cases}
+\hat{t} & 0 \le \hat{t} \le 1 \\
+2 - \hat{t} & 1 < \hat{t} \le 2
+\end{cases}
+\end{equation}
+and the ODE for $\hat{t} > \hat{t}_1 = \alpha$ becomes:
+\begin{equation}
+\boxed{\ddd{\hat{x}}{\hat{t}} = \hat{F}(\hat{t}) - \beta}
+\label{eq:dimless_ode}
+\end{equation}
+
+\noindent
+This is the cleanest form of the problem: a piecewise-linear forcing minus a constant friction, with onset at $\hat{t} = \alpha$.
+
+%% ============================================================
+\section{Key Observations}
+
+\begin{enumerate}
+    \item \textbf{The ODE is piecewise-linear, hence exactly solvable.}  Each phase yields polynomials in $t$ (quadratic for velocity, cubic for position) joined by continuity conditions at the transition times.
+
+    \item \textbf{The gap $\mu_s - \mu_k$ creates an asymmetry.}  The block requires a force $\mu_s mg$ to start moving, but once sliding, friction drops to $\mu_k mg$.  This means the block \emph{cannot} re-stick until the applied force drops below $\mu_s mg$ on the falling side --- and even then, only if the velocity happens to reach zero at that instant.
+
+    \item \textbf{The block always overshoots.}  Because $F_{\max} > \mu_s mg$ and the pulse is symmetric, the block accumulates significant velocity by $t = 3$ (the peak).  Even as $F(t)$ decreases, friction alone cannot stop the block quickly.  The block continues moving well after the pulse ends.
+
+    \item \textbf{Final displacement is an increasing function of $F_{\max}/(\mu_k mg)$.}  In the dimensionless form, the total displacement depends only on $\alpha$ and $\beta$ --- the ratios of friction forces to peak applied force.
+
+    \item \textbf{If $\mu_s = \mu_k$} (no static/kinetic distinction), the onset time $t_1$ and the force-balance time $t_2$ become symmetric about $t = 3$.  The problem simplifies but the block still overshoots due to accumulated momentum.
+\end{enumerate}
+
+\end{document}

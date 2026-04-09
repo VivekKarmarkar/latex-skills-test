@@ -1,0 +1,217 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+
+\newcommand{\dd}[2]{\frac{d #1}{d #2}}
+
+\title{The Exponential ODE: $\dd{u}{t} = \alpha\,u$\\[6pt]
+\large Analytical Solution by Separation of Variables}
+\author{Claude Opus 4.6}
+\date{April 2026}
+
+\begin{document}
+\maketitle
+
+%% ============================================================
+\section{Problem Statement}
+
+\begin{tcolorbox}[colback=blue!5, colframe=blue!50!black, title=The Exponential ODE]
+Find $u(t)$ satisfying:
+\begin{align}
+  \textbf{ODE:}& \quad \dd{u}{t} = \alpha\,u, \qquad \alpha \in \mathbb{R} \label{eq:ode}\\[6pt]
+  \textbf{IC:}& \quad u(0) = u_0 \label{eq:ic}
+\end{align}
+where $\alpha$ is a constant parameter and $u_0$ is the initial condition.
+\end{tcolorbox}
+
+\medskip
+\noindent
+This is the simplest first-order linear ODE with constant coefficients.
+Despite its simplicity, it is the prototype for exponential growth ($\alpha > 0$),
+exponential decay ($\alpha < 0$), and equilibrium ($\alpha = 0$).
+
+%% ============================================================
+\section{Solution by Separation of Variables}
+
+\subsection{Step 1: Separate the variables}
+
+Starting from \eqref{eq:ode}, move all $u$-dependence to the left and all $t$-dependence to the right.
+Assuming $u \neq 0$, divide both sides by $u$:
+\begin{equation}
+  \frac{1}{u}\,\dd{u}{t} = \alpha
+  \label{eq:separated_implicit}
+\end{equation}
+
+Now treat $\dd{u}{t}$ as a ratio of differentials and separate:
+\begin{equation}
+  \boxed{\frac{du}{u} = \alpha\,dt}
+  \label{eq:separated}
+\end{equation}
+
+\subsection{Step 2: Integrate both sides}
+
+Integrate the left side with respect to $u$ and the right side with respect to $t$:
+\begin{align}
+  \int \frac{du}{u} &= \int \alpha\,dt \\[6pt]
+  \ln|u| &= \alpha\,t + C
+  \label{eq:log_form}
+\end{align}
+where $C$ is the constant of integration.
+
+\subsection{Step 3: Exponentiate to solve for $u$}
+
+Exponentiate both sides of \eqref{eq:log_form}:
+\begin{align}
+  |u| &= e^{\alpha t + C} \\[6pt]
+      &= e^C \cdot e^{\alpha t}
+\end{align}
+
+Since $e^C > 0$ is an arbitrary positive constant, and absorbing the sign from the absolute value,
+we write $A = \pm e^C$ as a single arbitrary constant:
+\begin{equation}
+  u(t) = A\,e^{\alpha t}
+  \label{eq:general}
+\end{equation}
+
+This is the \textbf{general solution} --- it contains one arbitrary constant $A$,
+as expected for a first-order ODE.
+
+\subsection{Step 4: Apply the initial condition}
+
+Evaluate \eqref{eq:general} at $t = 0$ and use \eqref{eq:ic}:
+\begin{align}
+  u(0) &= A\,e^{\alpha \cdot 0} \\[6pt]
+       &= A\,e^0 \\[6pt]
+       &= A \cdot 1 \\[6pt]
+       &= A
+\end{align}
+
+Therefore $A = u_0$, and the particular solution is:
+
+\begin{tcolorbox}[colback=green!5, colframe=green!50!black, title=Analytical Solution (General IC)]
+\begin{equation}
+  \boxed{u(t) = u_0\,e^{\alpha t}}
+  \label{eq:solution}
+\end{equation}
+\end{tcolorbox}
+
+%% ============================================================
+\section{Verification}
+
+A solution is only valid if it satisfies both the ODE and the initial condition.
+
+\subsection{Check 1: Does it satisfy the ODE?}
+
+Differentiate \eqref{eq:solution} with respect to $t$:
+\begin{equation}
+  \dd{u}{t} = u_0 \cdot \alpha\,e^{\alpha t} = \alpha\,\bigl(u_0\,e^{\alpha t}\bigr) = \alpha\,u \quad\checkmark
+\end{equation}
+
+\subsection{Check 2: Does it satisfy the IC?}
+
+Evaluate at $t = 0$:
+\begin{equation}
+  u(0) = u_0\,e^{\alpha \cdot 0} = u_0 \cdot 1 = u_0 \quad\checkmark
+\end{equation}
+
+Both conditions are satisfied. The solution is verified.
+
+%% ============================================================
+\section{Specific Case: $u_0 = \tfrac{1}{2}$, $t \in [0,\,1]$}
+
+\begin{tcolorbox}[colback=red!5, colframe=red!50!black, title=Specific Problem]
+\begin{align}
+  \textbf{ODE:}& \quad \dd{u}{t} = \alpha\,u \\[6pt]
+  \textbf{IC:}& \quad u(0) = \tfrac{1}{2} \\[6pt]
+  \textbf{Domain:}& \quad t \in [0,\,1]
+\end{align}
+\end{tcolorbox}
+
+\medskip
+\noindent
+Substituting $u_0 = \frac{1}{2}$ into \eqref{eq:solution}:
+
+\begin{equation}
+  \boxed{u(t) = \frac{1}{2}\,e^{\alpha t}, \qquad t \in [0,\,1]}
+  \label{eq:specific}
+\end{equation}
+
+\medskip
+\noindent
+\textbf{Boundary values:}
+\begin{align}
+  u(0) &= \tfrac{1}{2}\,e^0 = \tfrac{1}{2} \\[6pt]
+  u(1) &= \tfrac{1}{2}\,e^{\alpha}
+\end{align}
+
+\medskip
+\noindent
+\textbf{Behavior depends on the sign of $\alpha$:}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{l|c|c|l}
+  \hline
+  \textbf{Regime} & $\alpha$ & $u(1)$ & \textbf{Behavior} \\
+  \hline
+  Growth    & $\alpha > 0$ & $> \frac{1}{2}$ & $u$ increases exponentially from $\frac{1}{2}$ \\
+  Equilibrium & $\alpha = 0$ & $= \frac{1}{2}$ & $u$ remains constant at $\frac{1}{2}$ \\
+  Decay     & $\alpha < 0$ & $< \frac{1}{2}$ & $u$ decreases exponentially toward $0$ \\
+  \hline
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent
+Some representative values at $t = 1$:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{c|c|c}
+  \hline
+  $\alpha$ & $u(1) = \frac{1}{2}e^{\alpha}$ & Decimal \\
+  \hline
+  $-2$  & $\frac{1}{2}e^{-2}$  & $\approx 0.0677$ \\
+  $-1$  & $\frac{1}{2}e^{-1}$  & $\approx 0.1839$ \\
+  $0$   & $\frac{1}{2}$        & $= 0.5000$ \\
+  $1$   & $\frac{1}{2}e$       & $\approx 1.3591$ \\
+  $2$   & $\frac{1}{2}e^{2}$   & $\approx 3.6945$ \\
+  \hline
+\end{tabular}
+\end{center}
+
+%% ============================================================
+\section{Key Observations}
+
+\begin{enumerate}
+  \item \textbf{The exponential is its own derivative.}
+    The function $e^{\alpha t}$ is the unique (up to scaling) eigenfunction of the
+    differentiation operator $\frac{d}{dt}$ with eigenvalue $\alpha$.
+    This is \emph{why} the exponential solves this ODE.
+
+  \item \textbf{Separation of variables works because the ODE is separable.}
+    The right-hand side $\alpha u$ factors as a function of $u$ alone times a
+    function of $t$ alone (with the $t$-part being the constant $\alpha$).
+    Not all ODEs have this structure.
+
+  \item \textbf{This ODE is the building block for linear systems.}
+    For a system $\frac{d\mathbf{u}}{dt} = A\,\mathbf{u}$ with constant matrix $A$,
+    the solution is $\mathbf{u}(t) = e^{At}\,\mathbf{u}_0$. Each eigenvector of $A$
+    evolves independently as $e^{\lambda_i t}$ --- i.e., each mode satisfies exactly
+    this scalar ODE with $\alpha = \lambda_i$.
+
+  \item \textbf{Stability is determined entirely by $\alpha$.}
+    If $\alpha < 0$: the origin is a stable equilibrium (perturbations decay).
+    If $\alpha > 0$: the origin is unstable (perturbations grow).
+    If $\alpha = 0$: neutral stability (perturbations persist but do not grow).
+
+  \item \textbf{The $u = 0$ edge case.}
+    In Step~1 we divided by $u$, requiring $u \neq 0$.
+    But $u(t) = 0$ for all $t$ is itself a valid solution (the trivial solution).
+    Since our IC has $u_0 = \frac{1}{2} \neq 0$, the exponential solution is the
+    correct one, and $u(t) > 0$ for all $t$.
+\end{enumerate}
+
+\end{document}
